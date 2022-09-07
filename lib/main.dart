@@ -1,68 +1,96 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
+  static final ValueNotifier<ThemeMode> _notifier =
+      ValueNotifier(ThemeMode.light);
   @override
   Widget build(BuildContext context) {
     var phoneController = TextEditingController();
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text("Send to Whatsapp"),
-          centerTitle: true,
-          actions: [
-            IconButton(
-                onPressed: () => showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                          content: Column(
-                            children: [
-                              Text("Developed with love in India"),
-                              Text("Developer: Nandan Wewhare"),
-                              ElevatedButton(
-                                  onPressed: () {},
-                                  child:
-                                      const FaIcon(FontAwesomeIcons.linkedin))
-                            ],
-                          ),
-                        )),
-                icon: const Icon(Icons.info_outline))
-          ],
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: phoneController,
-              decoration: InputDecoration(
-                prefixIcon: const FaIcon(FontAwesomeIcons.whatsapp),
-                labelText: "Enter Whatsapp Number",
-                enabledBorder:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                border:
-                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              keyboardType: TextInputType.phone,
-              maxLength: 10,
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _notifier,
+      builder: (_, mode, __) {
+        return MaterialApp(
+          theme: ThemeData.light(),
+          darkTheme: ThemeData.dark(),
+          themeMode: mode,
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text("Send to Whatsapp"),
+              centerTitle: true,
+              actions: [
+                IconButton(
+                    onPressed: () => _notifier.value = mode == ThemeMode.light
+                        ? ThemeMode.dark
+                        : ThemeMode.light,
+                    icon: _notifier.value == ThemeMode.light
+                        ? const Icon(Icons.light_mode)
+                        : const Icon(Icons.dark_mode))
+              ],
             ),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.send),
-              onPressed: () {
-                var number = "91${phoneController.text}";
-                var url = "http://wa.me/$number";
-                // call url launcher
-              },
-              label: const Text("Send"),
-            )
-          ],
-        ),
-      ),
+            body: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                      controller: phoneController,
+                      decoration: InputDecoration(
+                        prefixIcon: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: FaIcon(
+                            FontAwesomeIcons.whatsapp,
+                            color: Colors.green,
+                          ),
+                        ),
+                        labelText: "Enter Whatsapp Number",
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      maxLength: 10,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.send),
+                    onPressed: () async {
+                      if (phoneController.text.trim().isNotEmpty) {
+                        var number = "91${phoneController.text}";
+                        var url = Uri.parse("https://wa.me/$number");
+                        await launchUrl(url,
+                            mode: LaunchMode.externalApplication);
+                      }
+                    },
+                    label: const Text("Send"),
+                  ),
+                  const Spacer(),
+                  const Text(
+                    "Developed with ❤️ in 🇮🇳 ",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton.icon(
+                      icon: const FaIcon(FontAwesomeIcons.linkedin),
+                      onPressed: () async => await launchUrl(Uri.parse(
+                          "https://www.linkedin.com/in/nandanwewhare/")),
+                      label: const Text("Contact developer",
+                          style: TextStyle(fontSize: 12)))
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
