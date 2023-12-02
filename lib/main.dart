@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -57,7 +58,6 @@ class MyApp extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12)),
                       ),
                       keyboardType: TextInputType.phone,
-                      maxLength: 10,
                     ),
                   ),
                   ElevatedButton.icon(
@@ -71,6 +71,18 @@ class MyApp extends StatelessWidget {
                       }
                     },
                     label: const Text("Send"),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.paste),
+                    onPressed: () async {
+                      ClipboardData? data =
+                          await Clipboard.getData('text/plain');
+                      if (data != null) {
+                        phoneController.text = data.text!.replaceAll(' ', '');
+                      }
+                    },
+                    label: const Text("Paste from clipboard"),
                   ),
                   const Spacer(),
                   const Text(
