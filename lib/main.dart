@@ -66,8 +66,7 @@ class MyApp extends StatelessWidget {
                       if (phoneController.text.trim().isNotEmpty) {
                         var number = "91${phoneController.text}";
                         var url = Uri.parse("https://wa.me/$number");
-                        await launchUrl(url,
-                            mode: LaunchMode.externalApplication);
+                        await launchUrl(url);
                       }
                     },
                     label: const Text("Send"),
@@ -79,7 +78,9 @@ class MyApp extends StatelessWidget {
                       ClipboardData? data =
                           await Clipboard.getData('text/plain');
                       if (data != null) {
-                        phoneController.text = data.text!.replaceAll(' ', '');
+                        phoneController.text = data.text!
+                            .replaceAll(' ', '')
+                            .replaceAll('+91', '');
                       }
                     },
                     label: const Text("Paste from clipboard"),
